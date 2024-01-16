@@ -16,10 +16,18 @@ type Board struct {
 	Views int // `gorm:"column:view_Count"`
 }
 
+// GetBoardData : board 테이블에서 데이터 검색
 func GetBoardData(db *gorm.DB)([]Board, error) {
 	var boards []Board
 	
-	if result := db.Find(&boards); result.Error != nil {
+	// gorm은 어떻게 여기서 상호작용할 테이블을 알까?
+	// gorm은 구조체와 테이블(db)간 매핑을 생성하고
+	// 디폴트로 구조체의 이름의 복수형인 테이블 이름을 찾는다.
+	// e.g. Board 구조체는 boards 테이블과 매핑된다.
+	//
+	// slice의 타입 []Board를 보고 Gorm은 어떤 테이블과 상호작용할 지 알 수 있다.
+	// 그러고 나면 모든 데이터를 가져와 슬라이스에 추가한다.
+	if result := db.Where("idx IN?", []int{3,5}).Find(&boards); result.Error != nil {
 		
 		return nil, result.Error
 	}
