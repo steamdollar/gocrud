@@ -27,7 +27,6 @@ func SetupDatabase() *gorm.DB {
 	dbSSLMode := os.Getenv("DB_SSLMODE")
 	dbTimezone := os.Getenv("DB_TIMEZONE")
 	
-	
 	dsn := "host=" + dbHost + " user=" + dbUser + 
 	" password=" + dbPass + " dbname=" + dbName + " port=" + dbPort +
 	" sslmode=" + dbSSLMode + " TimeZone=" + dbTimezone
