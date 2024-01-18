@@ -5,6 +5,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	// "back/models"
 	"log"
@@ -19,6 +20,14 @@ func SetupDatabase() *gorm.DB {
 		log.Fatal("Error loading .env file")
 	}
 	
+	// activate logger
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+		    LogLevel: logger.Info, // or logger.Warn, logger.Error
+		},
+	)
+	
 	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
@@ -31,7 +40,7 @@ func SetupDatabase() *gorm.DB {
 	" password=" + dbPass + " dbname=" + dbName + " port=" + dbPort +
 	" sslmode=" + dbSSLMode + " TimeZone=" + dbTimezone
 	
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{ Logger : newLogger})
 	
 	if err != nil {
 		log.Fatal("Failed to connect to database", err)

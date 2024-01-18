@@ -1,9 +1,10 @@
 package main
 
 import (
+	"back/board"
+	"back/common"
 	"back/models"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -11,11 +12,20 @@ import (
 )
 
 func main() {
-	router := gin.Default()
-	
 	// TODO : psql > mssql server
 	// db setup
 	db := models.SetupDatabase()
+	app := common.NewApp(db)
+	
+	// 각 컨트롤러들을 가져온다
+	boardController := board.NewBoardController(app)
+	
+	controllers := []common.Controller{
+		boardController,
+	}
+	
+	// router 등록
+	router := SetupRouter(controllers)
 	
 	// create sample data 
 	sampleBoardData := models.Board{
@@ -33,34 +43,17 @@ func main() {
 	}
 	
 	// cors
-	
-	
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
-	
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"}
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type"}
 	
 	router.Use(cors.New(config))
 	
 	
+	// routers
 	router.GET("/", func(c *gin.Context) {
 		c.String(200, "\n Hello World\n Can you hear me? \n")
-	})
-	
-	router.GET("/sample", func(c *gin.Context) {
-		boards, err := models.GetBoardData(db)
-		
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		
-		c.JSON(http.StatusOK, boards)
-	})
-	
-	router.GET("/getPostContent", func(c *gin.Context) {
-		c.String(200, "asd")
 	})
 	
 	router.Run(":4000")

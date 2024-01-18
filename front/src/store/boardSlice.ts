@@ -24,15 +24,6 @@ export const fetchBoardData = createAsyncThunk("board/fetchData", async () => {
         return response.data;
 });
 
-export const fetchPostContent = createAsyncThunk(
-        "board/fetchPostContent",
-        async (idx, thunkAPI) => {
-                const response = await axios.get(
-                        "http://localhost:4000/content"
-                );
-        }
-);
-
 export const boardSlice = createSlice({
         name: "board",
         initialState,
