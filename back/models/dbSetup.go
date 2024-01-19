@@ -1,13 +1,12 @@
 package models
 
 import (
+	"back/board"
 	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 
-	// "back/models"
 	"log"
 
 	"github.com/joho/godotenv"
@@ -21,12 +20,12 @@ func SetupDatabase() *gorm.DB {
 	}
 	
 	// activate logger
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-		    LogLevel: logger.Info, // or logger.Warn, logger.Error
-		},
-	)
+	// newLogger := logger.New(
+	// 	log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+	// 	logger.Config{
+	// 	    LogLevel: logger.Info, // or logger.Warn, logger.Error
+	// 	},
+	// )
 	
 	dbHost := os.Getenv("DB_HOST")
 	dbUser := os.Getenv("DB_USER")
@@ -40,13 +39,15 @@ func SetupDatabase() *gorm.DB {
 	" password=" + dbPass + " dbname=" + dbName + " port=" + dbPort +
 	" sslmode=" + dbSSLMode + " TimeZone=" + dbTimezone
 	
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{ Logger : newLogger})
+	// db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{ Logger : newLogger})
+	
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	
 	if err != nil {
 		log.Fatal("Failed to connect to database", err)
 	}
 	
-	db.AutoMigrate(&Board{})
+	db.AutoMigrate(&board.Board{})
 	
 	return db
 }

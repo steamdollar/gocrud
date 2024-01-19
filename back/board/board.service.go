@@ -18,11 +18,19 @@ type BoardSummary struct {
 type Board struct {
 	BoardSummary `gorm:"embedded"`
 	Content string
-	
 }
 
+type BoardService struct {
+	DB *gorm.DB
+}
+
+func NewBoardService(db *gorm.DB) *BoardService {
+	return &BoardService{DB : db}
+}
+
+
 // GetBoardData : board 테이블에서 데이터 검색
-func GetBoardData(db *gorm.DB) ([]Board, error) {
+func (bs *BoardService) GetBoardData(db *gorm.DB) ([]Board, error) {
 	var boards []Board
 	
 	// gorm은 어떻게 여기서 상호작용할 테이블을 알까?
@@ -44,21 +52,56 @@ func GetBoardData(db *gorm.DB) ([]Board, error) {
 }
 
 // GetPostContent : 해당 idx의 데이터 셋의 내용을 리턴
-func GetPostContent(db *gorm.DB, idx int) (string, error) {
-	var content string
+func (bs *BoardService) GetPostContent(db *gorm.DB, idx int) (Board, error) {
+	var board Board
 	
 	result := db.
 	Table("boards"). // specify table
-	Select("content"). // specify column
+	// Select("*"). // specify column
 	Where("Idx = ?", idx). // 
-	Scan(&content) //scan result
+	First(&board) //scan result
 	
 	// how to see entire obj
 	//fmt.Printf("%+v\n", result.Config)
 	// spew.Dump(result)
 	if result.Error != nil {
-		return "", result.Error
+		return board, result.Error
+	}
+	
+	newViews := board.Views + 1
+	updateResult := db.Table("boards").Where("Idx = ?", idx).Update("views", newViews)
+	if updateResult.Error != nil {
+		return board, updateResult.Error
 	}
 
-	return content, nil
+	return board, nil
+}
+
+func (bs *BoardService) CreatePost(db *gorm.DB, postReq CreatePostDTO) (error) {
+	newPost := Board{
+		BoardSummary : BoardSummary{
+			Author: postReq.Author,
+			Views : 0,
+		},
+		Content : postReq.Content,
+	}
+	
+	result := db.Create(&newPost)
+	if result.Error != nil {
+		return  result.Error
+	}
+	
+	return nil 
+}
+
+func (bs *BoardService) DeletePost(db *gorm.DB, delReq DeleteRequestDTO) (error) {
+	result := db.
+	Where("idx = ? And author = ?", delReq.Idx, delReq.Author).
+	Delete(&Board{})
+	
+	if result.Error != nil {
+		return result.Error
+	}
+	
+	return nil	
 }

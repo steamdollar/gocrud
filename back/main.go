@@ -28,9 +28,9 @@ func main() {
 	router := SetupRouter(controllers)
 	
 	// create sample data 
-	sampleBoardData := models.Board{
+	sampleBoardData := board.Board{
 		Content: "sample post",
-		BoardSummary: models.BoardSummary{
+		BoardSummary: board.BoardSummary{
 			Author: "lsj",
 			Date:   time.Now(),
 			Views:  1,
@@ -42,7 +42,7 @@ func main() {
 		log.Println("Insertion failed", result.Error)
 	}
 	
-	// cors
+	// cors, allowed method 등 설정
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"}
